@@ -183,6 +183,22 @@ struct SettingsPanelView: View {
                                     .font(.system(size: 11, weight: .medium))
                             }
                             
+                            HStack {
+                                Text("Author")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Link(destination: URL(string: "https://github.com/nelsojona/")!) {
+                                    HStack(spacing: 4) {
+                                        Text("Jonathan Nelson")
+                                            .font(.system(size: 11, weight: .medium))
+                                        Image(systemName: "arrow.up.right.square")
+                                            .font(.system(size: 9))
+                                    }
+                                    .foregroundColor(.accentColor)
+                                }
+                            }
+                            
                             Divider()
                             
                             Link(destination: URL(string: "https://github.com/nelsojona/macbook-cooler")!) {
