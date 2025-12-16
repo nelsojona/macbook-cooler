@@ -21,7 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var eventMonitor: Any?
     
     private let popoverWidth: CGFloat = 320
-    private let popoverHeight: CGFloat = 480
+    private let popoverHeight: CGFloat = 520
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
