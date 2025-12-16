@@ -37,7 +37,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Create popover with glassmorphism view
         popover = NSPopover()
-        popover?.contentSize = NSSize(width: 340, height: 480)
+        popover?.contentSize = NSSize(width: 360, height: 520)
         popover?.behavior = .transient
         popover?.animates = true
         popover?.contentViewController = NSHostingController(

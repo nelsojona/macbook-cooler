@@ -20,7 +20,7 @@ struct MenuBarView: View {
                 }
             }
         }
-        .frame(width: 340, height: 480)
+        .frame(width: 360, height: 520)
         .alert(alertMessage, isPresented: $showAlert) {
             Button("OK", role: .cancel) { }
         }
@@ -290,11 +290,14 @@ struct MainDashboardView: View {
         VStack(spacing: 0) {
             // Header
             headerView
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
             
             Divider()
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 20)
             
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
                     // Temperature card
                     temperatureCard
@@ -311,25 +314,35 @@ struct MainDashboardView: View {
                     // Quick actions
                     quickActionsSection
                 }
-                .padding(16)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
             }
             
             Divider()
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 20)
             
             // Footer
             footerView
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
         }
     }
     
     private var headerView: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("MacBook Cooler")
-                    .font(.system(size: 15, weight: .semibold))
-                Text(appState.isServiceRunning ? "Service Running" : "Service Stopped")
-                    .font(.system(size: 11))
-                    .foregroundColor(appState.isServiceRunning ? .green : .secondary)
+                    .font(.system(size: 16, weight: .semibold))
+                    .lineLimit(1)
+                
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(appState.isServiceRunning ? Color.green : Color.gray)
+                        .frame(width: 8, height: 8)
+                    Text(appState.isServiceRunning ? "Service Running" : "Service Stopped")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                }
             }
             
             Spacer()
@@ -337,28 +350,33 @@ struct MainDashboardView: View {
             // Refresh button
             Button(action: { appState.checkHomebrewStatus() }) {
                 Image(systemName: "arrow.clockwise")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.secondary)
+                    .frame(width: 28, height: 28)
+                    .background(
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                    )
             }
             .buttonStyle(.plain)
             .help("Refresh status")
         }
-        .padding(16)
     }
     
     private var temperatureCard: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text("CPU Temperature")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.secondary)
                     
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
                         Text(String(format: "%.0f", appState.currentTemperature))
-                            .font(.system(size: 48, weight: .light, design: .rounded))
+                            .font(.system(size: 52, weight: .light, design: .rounded))
+                            .minimumScaleFactor(0.8)
                         Text("°C")
-                            .font(.system(size: 20, weight: .light))
+                            .font(.system(size: 22, weight: .light))
                             .foregroundColor(.secondary)
                     }
                 }
@@ -379,26 +397,27 @@ struct MainDashboardView: View {
                         .frame(width: geometry.size.width * min(appState.currentTemperature / 100, 1.0))
                 }
             }
-            .frame(height: 6)
+            .frame(height: 8)
         }
-        .padding(16)
+        .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
         )
     }
     
     private var temperatureIndicator: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
             Image(systemName: temperatureIcon)
-                .font(.system(size: 28))
+                .font(.system(size: 32))
                 .foregroundColor(temperatureColor)
             
             Text(appState.thermalPressure)
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundColor(.secondary)
         }
+        .frame(width: 70)
     }
     
     private var temperatureIcon: String {
@@ -424,7 +443,7 @@ struct MainDashboardView: View {
     }
     
     private var statsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
             StatCard(title: "GPU", value: String(format: "%.0f°C", appState.gpuTemperature), icon: "gpu")
             StatCard(title: "CPU Usage", value: String(format: "%.0f%%", appState.cpuUsage), icon: "cpu")
             StatCard(title: "Fan Speed", value: "\(appState.fanSpeed) RPM", icon: "fan.fill")
@@ -433,9 +452,9 @@ struct MainDashboardView: View {
     }
     
     private var powerModeSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("Power Mode")
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.secondary)
             
             Picker("", selection: $appState.powerMode) {
@@ -448,16 +467,23 @@ struct MainDashboardView: View {
                 appState.setPowerMode(newValue)
             }
         }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.ultraThinMaterial)
+        )
     }
     
     private var serviceControlSection: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("Background Service")
-                    .font(.system(size: 13, weight: .medium))
-                Text(appState.isServiceRunning ? "Running" : "Stopped")
+                    .font(.system(size: 14, weight: .medium))
+                    .lineLimit(1)
+                Text(appState.isServiceRunning ? "Auto thermal management active" : "Service is stopped")
                     .font(.system(size: 11))
-                    .foregroundColor(appState.isServiceRunning ? .green : .secondary)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
             }
             
             Spacer()
@@ -474,22 +500,22 @@ struct MainDashboardView: View {
                 }
             ))
             .toggleStyle(.switch)
-            .scaleEffect(0.8)
+            .labelsHidden()
         }
-        .padding(12)
+        .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(.ultraThinMaterial)
         )
     }
     
     private var quickActionsSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("Quick Actions")
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.secondary)
             
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 QuickActionButton(title: "Throttle", icon: "gauge.with.dots.needle.33percent", action: {})
                 QuickActionButton(title: "Optimize", icon: "wand.and.stars", action: {})
                 QuickActionButton(title: "Schedule", icon: "calendar.badge.clock", action: {})
@@ -515,7 +541,7 @@ struct MainDashboardView: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                Text("v\(appState.cliVersion)")
+                Text("v\(appState.cliVersion.isEmpty ? "1.0.0" : appState.cliVersion)")
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
             }
@@ -529,7 +555,6 @@ struct MainDashboardView: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(16)
     }
 }
 
@@ -540,24 +565,28 @@ struct StatCard: View {
     let icon: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: icon)
-                    .font(.system(size: 12))
+                    .font(.system(size: 14))
                     .foregroundColor(.secondary)
                 Spacer()
             }
             
             Text(value)
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             
             Text(title)
-                .font(.system(size: 10))
+                .font(.system(size: 11))
                 .foregroundColor(.secondary)
+                .lineLimit(1)
         }
-        .padding(12)
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(.ultraThinMaterial)
         )
     }
@@ -570,16 +599,17 @@ struct QuickActionButton: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 6) {
+            VStack(spacing: 8) {
                 Image(systemName: icon)
-                    .font(.system(size: 16))
+                    .font(.system(size: 18))
                 Text(title)
                     .font(.system(size: 10, weight: .medium))
+                    .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
+            .padding(.vertical, 14)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: 12)
                     .fill(.ultraThinMaterial)
             )
         }
@@ -706,5 +736,5 @@ struct AboutView: View {
 #Preview {
     MenuBarView()
         .environmentObject(AppState.shared)
-        .frame(width: 340, height: 480)
+        .frame(width: 360, height: 520)
 }
