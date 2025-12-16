@@ -407,24 +407,52 @@ struct OnboardingView: View {
     private var actionButton: some View {
         switch appState.homebrewStatus {
         case .notInstalled:
-            Link(destination: URL(string: "https://brew.sh")!) {
-                Label("Install Homebrew", systemImage: "arrow.up.right.square")
-                    .font(.system(size: 13, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor))
-                    .foregroundColor(.white)
+            VStack(spacing: 10) {
+                Link(destination: URL(string: "https://brew.sh")!) {
+                    Label("Install Homebrew", systemImage: "arrow.up.right.square")
+                        .font(.system(size: 13, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor))
+                        .foregroundColor(.white)
+                }
+                
+                Button(action: continueToApp) {
+                    Text("Skip - Use basic monitoring")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                
+                Text("Basic temperature monitoring works without CLI tools")
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary.opacity(0.7))
+                    .multilineTextAlignment(.center)
             }
         case .installed:
-            Button(action: installCLI) {
-                Label("Install CLI Tools", systemImage: "terminal")
-                    .font(.system(size: 13, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor))
-                    .foregroundColor(.white)
+            VStack(spacing: 10) {
+                Button(action: installCLI) {
+                    Label("Install CLI Tools", systemImage: "terminal")
+                        .font(.system(size: 13, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor))
+                        .foregroundColor(.white)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: continueToApp) {
+                    Text("Skip - Use basic monitoring")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                
+                Text("Basic temperature monitoring works without CLI tools")
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary.opacity(0.7))
+                    .multilineTextAlignment(.center)
             }
-            .buttonStyle(.plain)
         case .cliToolsInstalled:
             Button(action: continueToApp) {
                 Label("Continue", systemImage: "arrow.right")
