@@ -42,5 +42,5 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Our scripts specific
-/scripts/thermal_config.conf
+# User-specific configuration (keep the sample)
+/scripts/thermal_config.local.conf
