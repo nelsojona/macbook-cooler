@@ -288,9 +288,9 @@ struct MainDashboardView: View {
                         .foregroundColor(.secondary)
                     
                     HStack(alignment: .firstTextBaseline, spacing: 1) {
-                        Text(String(format: "%.0f", appState.currentTemperature))
+                        Text(String(format: "%.0f", appState.displayTemperature(appState.currentTemperature)))
                             .font(.system(size: 40, weight: .light, design: .rounded))
-                        Text("°C")
+                        Text(appState.temperatureUnit.symbol)
                             .font(.system(size: 16, weight: .light))
                             .foregroundColor(.secondary)
                     }
@@ -343,7 +343,7 @@ struct MainDashboardView: View {
             GridItem(.fixed((contentWidth - 10) / 2)),
             GridItem(.fixed((contentWidth - 10) / 2))
         ], spacing: 10) {
-            StatCard(title: "GPU", value: String(format: "%.0f°C", appState.gpuTemperature), icon: "rectangle.3.group.fill")
+            StatCard(title: "GPU", value: String(format: "%.0f%@", appState.displayTemperature(appState.gpuTemperature), appState.temperatureUnit.symbol), icon: "rectangle.3.group.fill")
             StatCard(title: "CPU Usage", value: String(format: "%.0f%%", appState.cpuUsage), icon: "cpu.fill")
             StatCard(title: "Fan Speed", value: "\(appState.fanSpeed) RPM", icon: "fan.fill")
             StatCard(title: "Power Mode", value: appState.powerMode.rawValue, icon: "bolt.fill")
@@ -494,6 +494,7 @@ struct SettingsView: View {
     var body: some View {
         TabView {
             GeneralSettingsView()
+                .environmentObject(appState)
                 .tabItem { Label("General", systemImage: "gear") }
             ThresholdsSettingsView()
                 .tabItem { Label("Thresholds", systemImage: "thermometer") }
@@ -505,11 +506,30 @@ struct SettingsView: View {
 }
 
 struct GeneralSettingsView: View {
+    @EnvironmentObject var appState: AppState
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("showTemperatureInMenuBar") private var showTemperatureInMenuBar = true
     
     var body: some View {
         Form {
+            Picker("Temperature Unit", selection: Binding(
+                get: { appState.temperatureUnit },
+                set: { appState.setTemperatureUnit($0) }
+            )) {
+                ForEach(TemperatureUnit.allCases, id: \.self) { unit in
+                    Text(unit.rawValue).tag(unit)
+                }
+            }
+            
+            Picker("Appearance", selection: Binding(
+                get: { appState.appearanceMode },
+                set: { appState.setAppearanceMode($0) }
+            )) {
+                ForEach(AppearanceMode.allCases, id: \.self) { mode in
+                    Text(mode.rawValue).tag(mode)
+                }
+            }
+            
             Toggle("Launch at login", isOn: $launchAtLogin)
             Toggle("Show temperature in menu bar", isOn: $showTemperatureInMenuBar)
         }

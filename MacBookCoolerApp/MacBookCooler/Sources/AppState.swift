@@ -17,6 +17,31 @@ enum PowerMode: String, CaseIterable {
     case highPerformance = "High Performance"
 }
 
+enum TemperatureUnit: String, CaseIterable {
+    case fahrenheit = "Fahrenheit"
+    case celsius = "Celsius"
+    
+    var symbol: String {
+        switch self {
+        case .fahrenheit: return "°F"
+        case .celsius: return "°C"
+        }
+    }
+    
+    var shortSymbol: String {
+        switch self {
+        case .fahrenheit: return "F"
+        case .celsius: return "C"
+        }
+    }
+}
+
+enum AppearanceMode: String, CaseIterable {
+    case system = "System"
+    case light = "Light"
+    case dark = "Dark"
+}
+
 class AppState: ObservableObject {
     static let shared = AppState()
     
@@ -36,6 +61,8 @@ class AppState: ObservableObject {
     
     @Published var isInstalling: Bool = false
     @Published var installProgress: String = ""
+    @Published var temperatureUnit: TemperatureUnit = .fahrenheit
+    @Published var appearanceMode: AppearanceMode = .system
     
     // MARK: - Private Properties
     private var timer: Timer?
@@ -47,6 +74,54 @@ class AppState: ObservableObject {
     
     init() {
         hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+        if let unitString = UserDefaults.standard.string(forKey: "temperatureUnit"),
+           let unit = TemperatureUnit(rawValue: unitString) {
+            temperatureUnit = unit
+        } else {
+            temperatureUnit = .fahrenheit // Default to Fahrenheit
+        }
+        
+        if let modeString = UserDefaults.standard.string(forKey: "appearanceMode"),
+           let mode = AppearanceMode(rawValue: modeString) {
+            appearanceMode = mode
+        } else {
+            appearanceMode = .system // Default to System
+        }
+        applyAppearance()
+    }
+    
+    // MARK: - Temperature Conversion
+    func displayTemperature(_ celsius: Double) -> Double {
+        switch temperatureUnit {
+        case .celsius:
+            return celsius
+        case .fahrenheit:
+            return (celsius * 9/5) + 32
+        }
+    }
+    
+    func setTemperatureUnit(_ unit: TemperatureUnit) {
+        temperatureUnit = unit
+        UserDefaults.standard.set(unit.rawValue, forKey: "temperatureUnit")
+    }
+    
+    func setAppearanceMode(_ mode: AppearanceMode) {
+        appearanceMode = mode
+        UserDefaults.standard.set(mode.rawValue, forKey: "appearanceMode")
+        applyAppearance()
+    }
+    
+    func applyAppearance() {
+        DispatchQueue.main.async {
+            switch self.appearanceMode {
+            case .system:
+                NSApp.appearance = nil
+            case .light:
+                NSApp.appearance = NSAppearance(named: .aqua)
+            case .dark:
+                NSApp.appearance = NSAppearance(named: .darkAqua)
+            }
+        }
     }
     
     // MARK: - Homebrew Detection

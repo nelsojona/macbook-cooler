@@ -118,7 +118,22 @@ Example for a full, non-interactive installation:
 
 ## Configuration
 
-All scripts can be configured by editing the `thermal_config.conf` file located in the `scripts` directory. This file allows you to adjust temperature thresholds, fan speed profiles, and other settings.
+### Menu Bar App
+
+All settings can be configured directly in the app:
+
+1.  Click the **Settings** button (gear icon) in the right-click menu.
+2.  Adjust settings in the **General** and **Thresholds** tabs.
+
+Available settings:
+-   **Temperature Unit**: Fahrenheit or Celsius (defaults to Fahrenheit).
+-   **Appearance**: System, Light, or Dark mode.
+-   **Launch at Login**: Start the app automatically.
+-   **Temperature Thresholds**: Customize when Low Power Mode is triggered.
+
+### CLI (Advanced)
+
+For CLI users, all scripts can be configured by editing the `thermal_config.conf` file located in the `scripts` directory. This file allows you to adjust temperature thresholds, fan speed profiles, and other settings.
 
 ```bash
 # Example configuration in thermal_config.conf

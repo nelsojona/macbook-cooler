@@ -123,7 +123,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func updateMenuItems() {
         if let tempItem = menu?.item(withTag: 100) {
-            tempItem.title = String(format: "Temperature: %.0f°C", AppState.shared.currentTemperature)
+            let displayTemp = AppState.shared.displayTemperature(AppState.shared.currentTemperature)
+            let unit = AppState.shared.temperatureUnit.symbol
+            tempItem.title = String(format: "Temperature: %.0f%@", displayTemp, unit)
         }
         if let serviceItem = menu?.item(withTag: 101) {
             serviceItem.state = AppState.shared.isServiceRunning ? .on : .off
@@ -138,22 +140,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let button = statusItem?.button else { return }
         
         let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        var symbolName: String
+        var tintColor: NSColor
         
         if temperature >= 90 {
-            button.image = NSImage(systemSymbolName: "thermometer.sun.fill", accessibilityDescription: "Critical")?.withSymbolConfiguration(config)
-            button.contentTintColor = .systemRed
+            symbolName = "thermometer.sun.fill"
+            tintColor = .systemRed
         } else if temperature >= 75 {
-            button.image = NSImage(systemSymbolName: "thermometer.high", accessibilityDescription: "High")?.withSymbolConfiguration(config)
-            button.contentTintColor = .systemOrange
+            symbolName = "thermometer.high"
+            tintColor = .systemOrange
         } else if temperature >= 60 {
-            button.image = NSImage(systemSymbolName: "thermometer.medium", accessibilityDescription: "Normal")?.withSymbolConfiguration(config)
-            button.contentTintColor = .labelColor
+            symbolName = "thermometer.medium"
+            tintColor = .controlTextColor // Adapts to menu bar appearance
         } else {
-            button.image = NSImage(systemSymbolName: "thermometer.low", accessibilityDescription: "Cool")?.withSymbolConfiguration(config)
-            button.contentTintColor = .systemGreen
+            symbolName = "thermometer.low"
+            tintColor = .systemGreen
         }
         
-        button.title = String(format: " %.0f°", temperature)
+        // Create image and set as template for proper menu bar appearance
+        if let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)?.withSymbolConfiguration(config) {
+            // For normal temps, use template mode so it adapts to menu bar
+            if temperature >= 60 && temperature < 75 {
+                image.isTemplate = true
+                button.image = image
+                button.contentTintColor = nil // Let system handle color
+            } else {
+                image.isTemplate = false
+                button.image = image
+                button.contentTintColor = tintColor
+            }
+        }
+        
+        let displayTemp = AppState.shared.displayTemperature(temperature)
+        let unitSymbol = AppState.shared.temperatureUnit.shortSymbol
+        button.title = String(format: " %.0f°%@", displayTemp, unitSymbol)
         button.imagePosition = .imageLeading
     }
     
