@@ -214,8 +214,14 @@ class AppState: ObservableObject {
     }
     
     private func getInstalledVersion() -> String {
+        // Check if Homebrew exists first
+        let brewPath = homebrewPath
+        guard FileManager.default.fileExists(atPath: brewPath) else {
+            return "0.0.0"
+        }
+        
         let task = Process()
-        task.executableURL = URL(fileURLWithPath: homebrewPath)
+        task.executableURL = URL(fileURLWithPath: brewPath)
         task.arguments = ["info", "--json=v2", "macbook-cooler"]
         
         let pipe = Pipe()
@@ -235,15 +241,24 @@ class AppState: ObservableObject {
                 return stable
             }
         } catch {
-            print("Error getting version: \(error)")
+            // Silently fail - Homebrew may not be installed
         }
         
         return "0.0.0"
     }
     
     func checkServiceStatus() {
+        // Check if Homebrew exists first
+        let brewPath = homebrewPath
+        guard FileManager.default.fileExists(atPath: brewPath) else {
+            DispatchQueue.main.async {
+                self.isServiceRunning = false
+            }
+            return
+        }
+        
         let task = Process()
-        task.executableURL = URL(fileURLWithPath: homebrewPath)
+        task.executableURL = URL(fileURLWithPath: brewPath)
         task.arguments = ["services", "list"]
         
         let pipe = Pipe()
@@ -261,7 +276,10 @@ class AppState: ObservableObject {
                 self.isServiceRunning = output.contains("macbook-cooler") && output.contains("started")
             }
         } catch {
-            print("Error checking service: \(error)")
+            // Silently fail - Homebrew may not be installed
+            DispatchQueue.main.async {
+                self.isServiceRunning = false
+            }
         }
     }
     
@@ -354,8 +372,14 @@ class AppState: ObservableObject {
     }
     
     private func runBrewCommand(_ arguments: [String]) -> (success: Bool, output: String) {
+        // Check if Homebrew exists first
+        let brewPath = homebrewPath
+        guard FileManager.default.fileExists(atPath: brewPath) else {
+            return (false, "Homebrew not installed. Install from https://brew.sh")
+        }
+        
         let task = Process()
-        task.executableURL = URL(fileURLWithPath: homebrewPath)
+        task.executableURL = URL(fileURLWithPath: brewPath)
         task.arguments = arguments
         
         let pipe = Pipe()
@@ -371,7 +395,7 @@ class AppState: ObservableObject {
             
             return (task.terminationStatus == 0, output)
         } catch {
-            return (false, error.localizedDescription)
+            return (false, "Failed to run brew: \(error.localizedDescription)")
         }
     }
     
