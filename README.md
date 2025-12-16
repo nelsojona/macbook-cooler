@@ -1,11 +1,19 @@
-# MacBook Cooler
+<p align="center">
+  <img src="assets/logo.png" alt="MacBook Cooler Logo" width="200">
+</p>
 
-A comprehensive thermal management solution for Apple Silicon MacBook Pro models (M1, M2, M3, M4 and later). This project includes both a native macOS menu bar application with a beautiful glassmorphism UI and a suite of command-line tools for advanced users.
+<h1 align="center">MacBook Cooler</h1>
 
-![macOS](https://img.shields.io/badge/macOS-Ventura%2B-blue)
-![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-M1%2FM2%2FM3%2FM4-orange)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Version](https://img.shields.io/badge/Version-1.1.0-purple)
+<p align="center">
+  A comprehensive thermal management solution for Apple Silicon MacBook Pro models (M1, M2, M3, M4 and later). This project includes both a native macOS menu bar application with a beautiful glassmorphism UI and a suite of command-line tools for advanced users.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-Ventura%2B-blue" alt="macOS">
+  <img src="https://img.shields.io/badge/Apple%20Silicon-M1%2FM2%2FM3%2FM4-orange" alt="Apple Silicon">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
+  <img src="https://img.shields.io/badge/Version-1.1.0-purple" alt="Version">
+</p>
 
 ---
 
@@ -264,6 +272,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## Author
-
-Created by [Jonathan Nelson](https://github.com/nelsojona)
+<p align="center">
+  Created by <a href="https://github.com/nelsojona">Jonathan Nelson</a>
+</p>
