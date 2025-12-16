@@ -732,25 +732,9 @@ struct MainDashboardView: View {
     
     private var footerView: some View {
         HStack {
-            if appState.homebrewStatus == .cliToolsOutdated {
-                Button(action: {
-                    appState.upgradeCLITools { success, message in
-                        alertMessage = message; showAlert = true
-                    }
-                }) {
-                    HStack(spacing: 2) {
-                        Image(systemName: "arrow.up.circle.fill")
-                        Text("Update")
-                    }
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(.orange)
-                }
-                .buttonStyle(.plain)
-            } else {
-                Text("v\(appState.cliVersion.isEmpty ? "1.1.0" : appState.cliVersion)")
-                    .font(.system(size: 9))
-                    .foregroundColor(.secondary)
-            }
+            Text("v1.1.0")
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
             
             Spacer()
             
