@@ -20,14 +20,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var menu: NSMenu?
     var eventMonitor: Any?
     
+    private let popoverWidth: CGFloat = 320
+    private let popoverHeight: CGFloat = 480
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Hide dock icon - menu bar only app
         NSApp.setActivationPolicy(.accessory)
         
-        // Check Homebrew installation status
         AppState.shared.checkHomebrewStatus()
         
-        // Create status bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem?.button {
@@ -37,27 +37,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.target = self
         }
         
-        // Create popover
         setupPopover()
-        
-        // Create right-click menu
         setupMenu()
         
-        // Start monitoring
         AppState.shared.startMonitoring { [weak self] in
             DispatchQueue.main.async {
                 self?.updateStatusBarIcon(temperature: AppState.shared.currentTemperature)
             }
         }
         
-        // Monitor for clicks outside popover
         eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             if self?.popover?.isShown == true {
                 self?.popover?.performClose(nil)
             }
         }
         
-        // Show onboarding if needed
         if !AppState.shared.hasCompletedOnboarding {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.showPopover()
@@ -66,31 +60,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func setupPopover() {
+        let contentView = MenuBarView()
+            .environmentObject(AppState.shared)
+            .frame(width: popoverWidth, height: popoverHeight)
+        
+        let hostingController = NSHostingController(rootView: contentView)
+        hostingController.view.frame = NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight)
+        
         popover = NSPopover()
-        popover?.contentSize = NSSize(width: 360, height: 520)
+        popover?.contentSize = NSSize(width: popoverWidth, height: popoverHeight)
         popover?.behavior = .transient
         popover?.animates = true
-        
-        let hostingController = NSHostingController(
-            rootView: MenuBarView()
-                .environmentObject(AppState.shared)
-        )
-        hostingController.view.frame = NSRect(x: 0, y: 0, width: 360, height: 520)
         popover?.contentViewController = hostingController
     }
     
     private func setupMenu() {
         menu = NSMenu()
         
-        // Temperature display (disabled, just for info)
         let tempItem = NSMenuItem(title: "Temperature: --°C", action: nil, keyEquivalent: "")
         tempItem.isEnabled = false
-        tempItem.tag = 100 // Tag to update later
+        tempItem.tag = 100
         menu?.addItem(tempItem)
         
         menu?.addItem(NSMenuItem.separator())
         
-        // Service control
         let serviceItem = NSMenuItem(title: "Service Running", action: #selector(toggleService), keyEquivalent: "")
         serviceItem.state = AppState.shared.isServiceRunning ? .on : .off
         serviceItem.tag = 101
@@ -98,26 +91,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         menu?.addItem(NSMenuItem.separator())
         
-        // Launch at Login
         let launchItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
         launchItem.state = UserDefaults.standard.bool(forKey: "launchAtLogin") ? .on : .off
         launchItem.tag = 102
         menu?.addItem(launchItem)
         
-        // Open Settings
         menu?.addItem(NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ","))
         
         menu?.addItem(NSMenuItem.separator())
         
-        // About
         menu?.addItem(NSMenuItem(title: "About MacBook Cooler", action: #selector(showAbout), keyEquivalent: ""))
-        
-        // Check for Updates
         menu?.addItem(NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: ""))
         
         menu?.addItem(NSMenuItem.separator())
         
-        // Quit
         menu?.addItem(NSMenuItem(title: "Quit MacBook Cooler", action: #selector(quitApp), keyEquivalent: "q"))
     }
     
@@ -125,29 +112,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let event = NSApp.currentEvent!
         
         if event.type == .rightMouseUp {
-            // Update menu items before showing
             updateMenuItems()
             statusItem?.menu = menu
             statusItem?.button?.performClick(nil)
-            statusItem?.menu = nil // Reset so left-click works again
+            statusItem?.menu = nil
         } else {
             togglePopover()
         }
     }
     
     private func updateMenuItems() {
-        // Update temperature
         if let tempItem = menu?.item(withTag: 100) {
             tempItem.title = String(format: "Temperature: %.0f°C", AppState.shared.currentTemperature)
         }
-        
-        // Update service status
         if let serviceItem = menu?.item(withTag: 101) {
             serviceItem.state = AppState.shared.isServiceRunning ? .on : .off
             serviceItem.title = AppState.shared.isServiceRunning ? "Service Running" : "Service Stopped"
         }
-        
-        // Update launch at login
         if let launchItem = menu?.item(withTag: 102) {
             launchItem.state = UserDefaults.standard.bool(forKey: "launchAtLogin") ? .on : .off
         }
@@ -159,20 +140,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
         
         if temperature >= 90 {
-            button.image = NSImage(systemSymbolName: "thermometer.sun.fill", accessibilityDescription: "Critical")?
-                .withSymbolConfiguration(config)
+            button.image = NSImage(systemSymbolName: "thermometer.sun.fill", accessibilityDescription: "Critical")?.withSymbolConfiguration(config)
             button.contentTintColor = .systemRed
         } else if temperature >= 75 {
-            button.image = NSImage(systemSymbolName: "thermometer.high", accessibilityDescription: "High")?
-                .withSymbolConfiguration(config)
+            button.image = NSImage(systemSymbolName: "thermometer.high", accessibilityDescription: "High")?.withSymbolConfiguration(config)
             button.contentTintColor = .systemOrange
         } else if temperature >= 60 {
-            button.image = NSImage(systemSymbolName: "thermometer.medium", accessibilityDescription: "Normal")?
-                .withSymbolConfiguration(config)
+            button.image = NSImage(systemSymbolName: "thermometer.medium", accessibilityDescription: "Normal")?.withSymbolConfiguration(config)
             button.contentTintColor = .labelColor
         } else {
-            button.image = NSImage(systemSymbolName: "thermometer.low", accessibilityDescription: "Cool")?
-                .withSymbolConfiguration(config)
+            button.image = NSImage(systemSymbolName: "thermometer.low", accessibilityDescription: "Cool")?.withSymbolConfiguration(config)
             button.contentTintColor = .systemGreen
         }
         
@@ -199,8 +176,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover?.performClose(nil)
     }
     
-    // MARK: - Menu Actions
-    
     @objc func toggleService() {
         AppState.shared.toggleService { _ in }
     }
@@ -210,7 +185,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let newValue = !currentValue
         UserDefaults.standard.set(newValue, forKey: "launchAtLogin")
         
-        // Register/unregister with macOS login items
         if #available(macOS 13.0, *) {
             do {
                 if newValue {

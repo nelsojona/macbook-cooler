@@ -1,5 +1,11 @@
 import SwiftUI
 
+// Constants for consistent sizing
+private let viewWidth: CGFloat = 320
+private let viewHeight: CGFloat = 480
+private let horizontalPadding: CGFloat = 16
+private let contentWidth: CGFloat = viewWidth - (horizontalPadding * 2)
+
 struct MenuBarView: View {
     @EnvironmentObject var appState: AppState
     @State private var alertMessage = ""
@@ -9,16 +15,13 @@ struct MenuBarView: View {
         ZStack {
             VisualEffectBlur(material: .popover, blendingMode: .behindWindow)
             
-            Group {
-                if !appState.hasCompletedOnboarding || appState.homebrewStatus == .notInstalled || appState.homebrewStatus == .installed {
-                    OnboardingView(showAlert: $showAlert, alertMessage: $alertMessage)
-                } else {
-                    MainDashboardView(showAlert: $showAlert, alertMessage: $alertMessage)
-                }
+            if !appState.hasCompletedOnboarding || appState.homebrewStatus == .notInstalled || appState.homebrewStatus == .installed {
+                OnboardingView(showAlert: $showAlert, alertMessage: $alertMessage)
+            } else {
+                MainDashboardView(showAlert: $showAlert, alertMessage: $alertMessage)
             }
         }
-        .frame(width: 360, height: 520)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .frame(width: viewWidth, height: viewHeight)
         .alert(alertMessage, isPresented: $showAlert) {
             Button("OK", role: .cancel) { }
         }
@@ -32,28 +35,28 @@ struct OnboardingView: View {
     @Binding var alertMessage: String
     
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 20) {
             Spacer()
             
-            VStack(spacing: 16) {
+            VStack(spacing: 14) {
                 Image(systemName: "thermometer.sun.fill")
-                    .font(.system(size: 56, weight: .light))
+                    .font(.system(size: 50, weight: .light))
                     .foregroundStyle(
                         LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
                     )
-                    .shadow(color: .orange.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .shadow(color: .orange.opacity(0.3), radius: 8, x: 0, y: 4)
                 
                 Text("MacBook Cooler")
-                    .font(.system(size: 24, weight: .semibold, design: .rounded))
+                    .font(.system(size: 22, weight: .semibold, design: .rounded))
                 
                 Text("Thermal Management Suite")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.secondary)
             }
             
             Spacer()
             
-            VStack(spacing: 16) {
+            VStack(spacing: 14) {
                 statusCard
                 
                 if appState.isInstalling {
@@ -62,39 +65,39 @@ struct OnboardingView: View {
                     actionButton
                 }
             }
-            .padding(.horizontal, 24)
+            .frame(width: contentWidth)
             
             Spacer()
             
             footerLinks
-                .padding(.bottom, 20)
+                .padding(.bottom, 16)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(width: viewWidth, height: viewHeight)
     }
     
     private var statusCard: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             statusIcon
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(statusTitle)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                 Text(statusSubtitle)
-                    .font(.system(size: 12))
+                    .font(.system(size: 11))
                     .foregroundColor(.secondary)
             }
             
             Spacer()
         }
-        .padding(16)
-        .background(RoundedRectangle(cornerRadius: 12).fill(.ultraThinMaterial))
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial))
     }
     
     private var statusIcon: some View {
         Group {
             switch appState.homebrewStatus {
             case .checking:
-                ProgressView().scaleEffect(0.8)
+                ProgressView().scaleEffect(0.7)
             case .notInstalled:
                 Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.orange)
             case .installed:
@@ -105,7 +108,7 @@ struct OnboardingView: View {
                 Image(systemName: "arrow.up.circle.fill").foregroundColor(.orange)
             }
         }
-        .font(.system(size: 24))
+        .font(.system(size: 22))
     }
     
     private var statusTitle: String {
@@ -157,35 +160,35 @@ struct OnboardingView: View {
     }
     
     private func buttonContent(icon: String, text: String, colors: [Color]) -> some View {
-        HStack {
+        HStack(spacing: 6) {
             Image(systemName: icon)
             Text(text)
         }
-        .font(.system(size: 14, weight: .semibold))
+        .font(.system(size: 13, weight: .semibold))
         .foregroundColor(.white)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .frame(height: 44)
         .background(LinearGradient(colors: colors, startPoint: .leading, endPoint: .trailing))
-        .cornerRadius(12)
+        .cornerRadius(10)
     }
     
     private var installingView: some View {
-        VStack(spacing: 12) {
-            ProgressView().scaleEffect(1.2)
+        VStack(spacing: 10) {
+            ProgressView().scaleEffect(1.0)
             Text(appState.installProgress)
-                .font(.system(size: 13))
+                .font(.system(size: 12))
                 .foregroundColor(.secondary)
         }
-        .frame(height: 60)
+        .frame(height: 50)
     }
     
     private var footerLinks: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 12) {
             Link("GitHub", destination: URL(string: "https://github.com/nelsojona/macbook-cooler")!)
             Text("•").foregroundColor(.secondary)
-            Link("Documentation", destination: URL(string: "https://github.com/nelsojona/macbook-cooler#readme")!)
+            Link("Docs", destination: URL(string: "https://github.com/nelsojona/macbook-cooler#readme")!)
         }
-        .font(.system(size: 11))
+        .font(.system(size: 10))
         .foregroundColor(.secondary)
     }
     
@@ -213,53 +216,52 @@ struct MainDashboardView: View {
     @Binding var showAlert: Bool
     @Binding var alertMessage: String
     
-    private let contentPadding: CGFloat = 16
-    private let cardSpacing: CGFloat = 12
-    
     var body: some View {
         VStack(spacing: 0) {
+            // Header
             headerView
-                .padding(.horizontal, contentPadding)
-                .padding(.top, 14)
-                .padding(.bottom, 10)
+                .frame(width: contentWidth)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
             
             Divider()
-                .padding(.horizontal, contentPadding)
+                .frame(width: contentWidth)
             
+            // Scrollable content
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: cardSpacing) {
+                VStack(spacing: 10) {
                     temperatureCard
                     statsGrid
                     powerModeSection
                     serviceControlSection
                 }
-                .padding(.horizontal, contentPadding)
-                .padding(.vertical, cardSpacing)
+                .frame(width: contentWidth)
+                .padding(.vertical, 12)
             }
-            .clipped()
             
             Divider()
-                .padding(.horizontal, contentPadding)
+                .frame(width: contentWidth)
             
+            // Footer
             footerView
-                .padding(.horizontal, contentPadding)
+                .frame(width: contentWidth)
                 .padding(.vertical, 10)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(width: viewWidth, height: viewHeight)
     }
     
     private var headerView: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text("MacBook Cooler")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                 
-                HStack(spacing: 5) {
+                HStack(spacing: 4) {
                     Circle()
                         .fill(appState.isServiceRunning ? Color.green : Color.gray)
-                        .frame(width: 7, height: 7)
+                        .frame(width: 6, height: 6)
                     Text(appState.isServiceRunning ? "Service Running" : "Service Stopped")
-                        .font(.system(size: 11))
+                        .font(.system(size: 10))
                         .foregroundColor(.secondary)
                 }
             }
@@ -268,9 +270,9 @@ struct MainDashboardView: View {
             
             Button(action: { appState.checkHomebrewStatus() }) {
                 Image(systemName: "arrow.clockwise")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.secondary)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 22, height: 22)
                     .background(Circle().fill(.ultraThinMaterial))
             }
             .buttonStyle(.plain)
@@ -278,49 +280,48 @@ struct MainDashboardView: View {
     }
     
     private var temperatureCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 0) {
-                VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text("CPU Temperature")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundColor(.secondary)
                     
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    HStack(alignment: .firstTextBaseline, spacing: 1) {
                         Text(String(format: "%.0f", appState.currentTemperature))
-                            .font(.system(size: 44, weight: .light, design: .rounded))
+                            .font(.system(size: 40, weight: .light, design: .rounded))
                         Text("°C")
-                            .font(.system(size: 18, weight: .light))
+                            .font(.system(size: 16, weight: .light))
                             .foregroundColor(.secondary)
                     }
                 }
                 
                 Spacer()
                 
-                VStack(spacing: 4) {
+                VStack(spacing: 2) {
                     Image(systemName: temperatureIcon)
-                        .font(.system(size: 26))
+                        .font(.system(size: 24))
                         .foregroundColor(temperatureColor)
                     Text(appState.thermalPressure)
-                        .font(.system(size: 10, weight: .medium))
+                        .font(.system(size: 9, weight: .medium))
                         .foregroundColor(.secondary)
                 }
-                .frame(width: 60)
             }
             
             // Temperature bar
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
+                    RoundedRectangle(cornerRadius: 2)
                         .fill(Color.secondary.opacity(0.2))
-                    RoundedRectangle(cornerRadius: 3)
+                    RoundedRectangle(cornerRadius: 2)
                         .fill(LinearGradient(colors: [.green, .yellow, .orange, .red], startPoint: .leading, endPoint: .trailing))
                         .frame(width: geo.size.width * min(max(appState.currentTemperature / 100, 0), 1.0))
                 }
             }
-            .frame(height: 6)
+            .frame(height: 5)
         }
-        .padding(14)
-        .background(RoundedRectangle(cornerRadius: 12).fill(.ultraThinMaterial))
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial))
     }
     
     private var temperatureIcon: String {
@@ -339,9 +340,9 @@ struct MainDashboardView: View {
     
     private var statsGrid: some View {
         LazyVGrid(columns: [
-            GridItem(.flexible(), spacing: cardSpacing),
-            GridItem(.flexible(), spacing: cardSpacing)
-        ], spacing: cardSpacing) {
+            GridItem(.fixed((contentWidth - 10) / 2)),
+            GridItem(.fixed((contentWidth - 10) / 2))
+        ], spacing: 10) {
             StatCard(title: "GPU", value: String(format: "%.0f°C", appState.gpuTemperature), icon: "rectangle.3.group.fill")
             StatCard(title: "CPU Usage", value: String(format: "%.0f%%", appState.cpuUsage), icon: "cpu.fill")
             StatCard(title: "Fan Speed", value: "\(appState.fanSpeed) RPM", icon: "fan.fill")
@@ -350,14 +351,14 @@ struct MainDashboardView: View {
     }
     
     private var powerModeSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("Power Mode")
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(.secondary)
             
             Picker("", selection: $appState.powerMode) {
                 ForEach(PowerMode.allCases, id: \.self) { mode in
-                    Text(mode.rawValue).tag(mode)
+                    Text(mode.shortName).tag(mode)
                 }
             }
             .pickerStyle(.segmented)
@@ -365,17 +366,17 @@ struct MainDashboardView: View {
                 appState.setPowerMode(newValue)
             }
         }
-        .padding(12)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial))
+        .padding(10)
+        .background(RoundedRectangle(cornerRadius: 8).fill(.ultraThinMaterial))
     }
     
     private var serviceControlSection: some View {
-        HStack(spacing: 10) {
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text("Background Service")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                 Text(appState.isServiceRunning ? "Auto thermal management" : "Service stopped")
-                    .font(.system(size: 10))
+                    .font(.system(size: 9))
                     .foregroundColor(.secondary)
             }
             
@@ -391,10 +392,10 @@ struct MainDashboardView: View {
             ))
             .toggleStyle(.switch)
             .labelsHidden()
-            .scaleEffect(0.8)
+            .scaleEffect(0.75)
         }
-        .padding(12)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial))
+        .padding(10)
+        .background(RoundedRectangle(cornerRadius: 8).fill(.ultraThinMaterial))
     }
     
     private var footerView: some View {
@@ -405,17 +406,17 @@ struct MainDashboardView: View {
                         alertMessage = message; showAlert = true
                     }
                 }) {
-                    HStack(spacing: 3) {
+                    HStack(spacing: 2) {
                         Image(systemName: "arrow.up.circle.fill")
                         Text("Update")
                     }
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 9, weight: .medium))
                     .foregroundColor(.orange)
                 }
                 .buttonStyle(.plain)
             } else {
                 Text("v\(appState.cliVersion.isEmpty ? "1.0.0" : appState.cliVersion)")
-                    .font(.system(size: 10))
+                    .font(.system(size: 9))
                     .foregroundColor(.secondary)
             }
             
@@ -423,7 +424,7 @@ struct MainDashboardView: View {
             
             Button(action: { NSApp.terminate(nil) }) {
                 Text("Quit")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 9, weight: .medium))
                     .foregroundColor(.secondary)
             }
             .buttonStyle(.plain)
@@ -438,23 +439,35 @@ struct StatCard: View {
     let icon: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             Image(systemName: icon)
-                .font(.system(size: 12))
+                .font(.system(size: 11))
                 .foregroundColor(.secondary)
             
             Text(value)
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             
             Text(title)
-                .font(.system(size: 10))
+                .font(.system(size: 9))
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(10)
-        .background(RoundedRectangle(cornerRadius: 10).fill(.ultraThinMaterial))
+        .padding(8)
+        .background(RoundedRectangle(cornerRadius: 8).fill(.ultraThinMaterial))
+    }
+}
+
+// MARK: - Power Mode Extension
+extension PowerMode {
+    var shortName: String {
+        switch self {
+        case .automatic: return "Auto"
+        case .lowPower: return "Low"
+        case .normal: return "Normal"
+        case .highPerformance: return "High"
+        }
     }
 }
 
@@ -487,7 +500,7 @@ struct SettingsView: View {
             AboutView()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
-        .frame(width: 450, height: 300)
+        .frame(width: 400, height: 250)
     }
 }
 
@@ -515,17 +528,17 @@ struct ThresholdsSettingsView: View {
                 HStack {
                     Text("Low Power Mode Trigger")
                     Spacer()
-                    TextField("", value: $highThreshold, format: .number).frame(width: 60)
+                    TextField("", value: $highThreshold, format: .number).frame(width: 50)
                 }
                 HStack {
                     Text("Normal Mode Return")
                     Spacer()
-                    TextField("", value: $lowThreshold, format: .number).frame(width: 60)
+                    TextField("", value: $lowThreshold, format: .number).frame(width: 50)
                 }
                 HStack {
                     Text("Critical Alert")
                     Spacer()
-                    TextField("", value: $criticalThreshold, format: .number).frame(width: 60)
+                    TextField("", value: $criticalThreshold, format: .number).frame(width: 50)
                 }
             }
         }
@@ -535,14 +548,15 @@ struct ThresholdsSettingsView: View {
 
 struct AboutView: View {
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             Image(systemName: "thermometer.sun.fill")
-                .font(.system(size: 48))
+                .font(.system(size: 40))
                 .foregroundStyle(LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing))
-            Text("MacBook Cooler").font(.title2.bold())
-            Text("Thermal Management Suite").foregroundColor(.secondary)
-            Text("Version 1.0.0").font(.caption).foregroundColor(.secondary)
+            Text("MacBook Cooler").font(.headline)
+            Text("Thermal Management Suite").font(.caption).foregroundColor(.secondary)
+            Text("Version 1.0.0").font(.caption2).foregroundColor(.secondary)
             Link("View on GitHub", destination: URL(string: "https://github.com/nelsojona/macbook-cooler")!)
+                .font(.caption)
         }
         .padding()
     }
